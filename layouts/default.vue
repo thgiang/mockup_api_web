@@ -8,23 +8,25 @@
       </div>
     </div>
     <Nuxt/>
-    <div class="footer text-center p-2">
-      <div class="container-fluid">
-        ©2020 - GiangTH - All right reserved
-      </div>
-    </div>
   </div>
 </template>
 <script>
 </script>
-<style scoped>
+<style>
+  body {
+    padding-top: 50px;
+  }
   .header {
     background-color: #24292e;
     height: 50px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 9999;
   }
-
   .header .logo {
-    width: 50px;
+    width: 40px;
+    padding-top: 5px;
     fill: #FFF;
   }
 </style>
