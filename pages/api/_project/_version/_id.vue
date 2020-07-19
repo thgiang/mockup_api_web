@@ -20,23 +20,25 @@
           </div>
         </div>
       </div>
-      <strong class="sidebar-label">API(s)</strong>
-      <ul class="api-list">
-        <li class="text-center bg-light api-new-button">
+      <div class="sidebar-label">
+        <strong>API list</strong>
+        <button class="btn btn-success btn-sm float-right" style="line-height: 0.8rem; padding: 3px 10px">
           <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-plus-circle-fill" fill="currentColor"
                xmlns="http://www.w3.org/2000/svg">
             <path fill-rule="evenodd"
                   d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4a.5.5 0 0 0-1 0v3.5H4a.5.5 0 0 0 0 1h3.5V12a.5.5 0 0 0 1 0V8.5H12a.5.5 0 0 0 0-1H8.5V4z"/>
           </svg>
-          ADD NEW API
-        </li>
+          ADD NEW
+        </button>
+      </div>
+      <ul class="api-list">
         <li>
           <span class="method-request method-get">GET</span> users
         </li>
         <li>
           <span class="method-request method-get">GET</span> user/$user_id
         </li>
-        <li>
+        <li class="active">
           <span class="method-request method-post">POST</span> user/$user_id
         </li>
         <li>
@@ -82,7 +84,8 @@
       </ul>
       <button class="btn btn-success col-12 api-list-export-button">
         <svg x="0px" y="0px"
-              viewBox="0 0 512 512" style="enable-background:new 0 0 20 20; height: 18px;fill: #FFF; margin-top: -5px;" xml:space="preserve">
+             viewBox="0 0 512 512" style="enable-background:new 0 0 20 20; height: 18px;fill: #FFF; margin-top: -5px;"
+             xml:space="preserve">
               <g>
                 <g>
                   <path d="M382.56,233.376C379.968,227.648,374.272,224,368,224h-64V16c0-8.832-7.168-16-16-16h-64c-8.832,0-16,7.168-16,16v208h-64
@@ -90,7 +93,7 @@
                   c4.608,0,8.992-2.016,12.032-5.472l112-128C384.192,245.824,385.152,239.104,382.56,233.376z"/>
                 </g>
               </g>
-              <g>
+          <g>
                 <g>
                   <path d="M432,352v96H80v-96H16v128c0,17.696,14.336,32,32,32h416c17.696,0,32-14.304,32-32V352H432z"/>
                 </g>
@@ -122,7 +125,7 @@
           <form class="form-inline">
             <div class="col-sm-1 p-0 pr-1">
               <label class="sr-only" for="request_type">Request type</label>
-              <select name="request_type" id="request_type" class="form-control col-12 mb-2 mr-sm-2"
+              <select name="request_type" id="request_type" class="form-control col-12 mb-2 mr-sm-2" style="width: 100%"
                       v-model="api.request_type">
                 <option value="GET">GET</option>
                 <option value="POST">POST</option>
@@ -132,13 +135,14 @@
               <label class="sr-only" for="slug">Username</label>
               <div class="input-group mb-2">
                 <div class="input-group-prepend">
-                  <div class="input-group-text">/api/{{project}}/{{version}}/</div>
+                  <div class="input-group-text">/{{project}}/{{version}}/</div>
                 </div>
                 <input type="text" class="form-control" id="slug" placeholder="user/$user_id/edit" v-model="api.slug">
               </div>
             </div>
             <div class="col-sm-1 p-0">
-              <button type="button" class="btn btn-success mb-2 col-12" @click="save()" style="margin-top: -1px">Save</button>
+              <button type="button" class="btn btn-success mb-2 col-12" @click="save()" style="margin-top: -1px">Save
+              </button>
             </div>
             <textarea class="form-control col-12" placeholder="Detail description of this API"
                       v-model="api.description">{{api.description}}</textarea>
@@ -151,7 +155,7 @@
             </ul>
           </div>
           <div class="" v-if="tab === 'response'">
-            <textarea rows="12" class="form-control" placeholder="Response content" v-model="response"></textarea>
+            <textarea rows="12" class="form-control" placeholder="Response content" v-model="api.response"></textarea>
           </div>
           <div class="" v-if="tab === 'params'">
             <table class="table table-bordered">
@@ -208,17 +212,17 @@
   class Api {
     constructor() {
       this.id = 0;
-      this.slug = "";
-      this.description = "";
+      this.slug = "users";
+      this.description = "Mô tả Api users";
       this.request_type = "GET";
-      this.response = "";
+      this.response = "Nội dung cần trà về";
     }
   }
 
   class Param {
     constructor() {
-      this.name = "";
-      this.description = "";
+      this.name = "username";
+      this.description = "Mô tả username";
       this.type = "GET";
       this.removable = true;
       this.api_id = 0;
@@ -238,7 +242,6 @@
         tab: "params",
         api: new Api(),
         params: [new Param(), new Param(), new Param()],
-        response: "",
 
         sendString: ""
       }
@@ -252,6 +255,21 @@
           params: this.params,
           response: "",
         });
+
+        let self = this;
+        let sendData = {"version_id": this.version, "api": this.api, "params": this.params};
+        this.$axios.post('http://localhost/mock_api/api/api/save', sendData).then(response => {
+          if (response.data.status === "success") {
+            console.log("Gọi API lưu thành công");
+            console.log(response.data.data)
+            //this.$router.push({name: 'blog-id', params: {id: response.data.data.id}});
+          } else {
+            console.log("Gọi API lưu bị lỗi");
+            console.log(response.data.message)
+          }
+        }).catch(error => {
+          alert("Lỗi lưu bài viết: " + error);
+        })
       }
     }
   }
@@ -348,14 +366,21 @@
     font-size: 12px;
   }
 
-  .method-get {
+  .active .method-request {
     background: #069255;
     color: #FFF;
   }
 
+  .method-get {
+    background: #b1b1b1;
+    /*background: #069255;*/
+    color: #FFF;
+  }
+
   .method-post {
-    background: #ffbc00;
-    color: #555;
+    background: #DDD;
+    /*background: #FFBC00;*/
+    color: #222;
   }
 
 

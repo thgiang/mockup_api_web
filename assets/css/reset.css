@@ -27,7 +27,7 @@ a:hover {
   background: #069255;
 }
 .btn-success:hover {
-  background: #02bb6f;
+  background: #098e59;
 }
 .btn:focus {
   box-shadow: none;
@@ -53,4 +53,8 @@ a:hover {
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+.input-group-text {
+  background-color: #f3f3f3!important;
 }
