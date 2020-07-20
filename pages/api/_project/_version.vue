@@ -18,8 +18,10 @@
       </div>
       <div class="sidebar-label">
         <strong>API list</strong>
-        <button class="btn btn-success btn-sm float-right" style="line-height: 0.8rem; padding: 3px 10px" @click="newApi()">
-          <svg width="0.8em" height="0.8em" viewBox="0 0 16 16" class="bi bi-plus-circle-fill" fill="currentColor" style="margin-top: -2px"
+        <button class="btn btn-success btn-sm float-right" style="line-height: 0.8rem; padding: 3px 10px"
+                @click="newApi()">
+          <svg width="0.8em" height="0.8em" viewBox="0 0 16 16" class="bi bi-plus-circle-fill" fill="currentColor"
+               style="margin-top: -2px"
                xmlns="http://www.w3.org/2000/svg">
             <path fill-rule="evenodd"
                   d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4a.5.5 0 0 0-1 0v3.5H4a.5.5 0 0 0 0 1h3.5V12a.5.5 0 0 0 1 0V8.5H12a.5.5 0 0 0 0-1H8.5V4z"/>
@@ -55,8 +57,10 @@
       </button>
       -->
       <button class="btn btn-success col-12 api-list-export-button">
-        <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-             viewBox="0 0 368.008 368.008" style="enable-background:new 0 0 20 20; height: 18px; fill: #FFF; margin-top: -5px;" xml:space="preserve">
+        <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+             x="0px" y="0px"
+             viewBox="0 0 368.008 368.008"
+             style="enable-background:new 0 0 20 20; height: 18px; fill: #FFF; margin-top: -5px;" xml:space="preserve">
 
 	<g>
 		<path d="M368,88.004c0-1.032-0.224-2.04-0.6-2.976c-0.152-0.376-0.416-0.664-0.624-1.016c-0.272-0.456-0.472-0.952-0.832-1.352
@@ -120,7 +124,7 @@
                       v-model="api.description">{{api.description}}</textarea>
           </form>
           <div class="bg-danger text-white p-2 mt-2" v-if="saveApiError.message !== ''">
-           {{saveApiError.message}}
+            {{saveApiError.message}}
           </div>
           <div class="pt-3">
             <ul class="api-tabs">
@@ -236,7 +240,7 @@
         params: [new Param(), new Param(), new Param()],
 
         tab: "params",
-        saveApiError: {'status': 'error','message': ''}
+        saveApiError: {'status': 'error', 'message': ''}
       }
     },
     mounted() {
@@ -262,8 +266,8 @@
       })
     },
     watch: {
-      version: function(newVal, oldVal) {
-        this.$axios.get('/version_apis/'+newVal.id).then(response => {
+      version: function (newVal, oldVal) {
+        this.$axios.get('/version_apis/' + newVal.id).then(response => {
           this.apis = response.data.data
         }).catch(error => {
           alert("Cannot load api list. Press F5 to try again: " + error)
@@ -278,16 +282,16 @@
       },
       editApi(api) {
         this.api = api;
-        this.$axios.get('api/'+api.id).then(response => {
+        this.$axios.get('api/' + api.id).then(response => {
           if (response.data.status === "success") {
 
             // Map response params from server to state params
             let params = []
-            for(let i = 0; i < response.data.data.params.length; i++) {
+            for (let i = 0; i < response.data.data.params.length; i++) {
               let temp = response.data.data.params[i];
               let param = new Param()
-              for(let j = 0; j < Object.keys(param).length; j++) {
-                if(typeof temp[Object.keys(param)[j]] !== 'undefined') {
+              for (let j = 0; j < Object.keys(param).length; j++) {
+                if (typeof temp[Object.keys(param)[j]] !== 'undefined') {
                   param[Object.keys(param)[j]] = temp[Object.keys(param)[j]];
                 }
               }
