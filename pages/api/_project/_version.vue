@@ -6,24 +6,20 @@
         <div class="form-row p-2">
           <div class="col">
             <select class="form-control custom-project-select" v-model="project">
-              <option value="moshop-web">moshop-web</option>
-              <option value="moshop-wh">moshop-wh</option>
-              <option value="moshop-x">moshop-x</option>
+              <option v-for="pj in projects" :value="pj">{{pj.name}}</option>
             </select>
           </div>
           <div class="col">
             <select class="form-control custom-project-select" v-model="version">
-              <option value="v1.0">v1.0</option>
-              <option value="v1.1">v1.1</option>
-              <option value="v2.0">v2.0</option>
+              <option v-for="vs in project.versions" :value="vs">{{vs.name}}</option>
             </select>
           </div>
         </div>
       </div>
       <div class="sidebar-label">
         <strong>API list</strong>
-        <button class="btn btn-success btn-sm float-right" style="line-height: 0.8rem; padding: 3px 10px">
-          <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-plus-circle-fill" fill="currentColor"
+        <button class="btn btn-success btn-sm float-right" style="line-height: 0.8rem; padding: 3px 10px" @click="newApi()">
+          <svg width="0.8em" height="0.8em" viewBox="0 0 16 16" class="bi bi-plus-circle-fill" fill="currentColor" style="margin-top: -2px"
                xmlns="http://www.w3.org/2000/svg">
             <path fill-rule="evenodd"
                   d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4a.5.5 0 0 0-1 0v3.5H4a.5.5 0 0 0 0 1h3.5V12a.5.5 0 0 0 1 0V8.5H12a.5.5 0 0 0 0-1H8.5V4z"/>
@@ -32,56 +28,11 @@
         </button>
       </div>
       <ul class="api-list">
-        <li>
-          <span class="method-request method-get">GET</span> users
-        </li>
-        <li>
-          <span class="method-request method-get">GET</span> user/$user_id
-        </li>
-        <li class="active">
-          <span class="method-request method-post">POST</span> user/$user_id
-        </li>
-        <li>
-          <span class="method-request method-get">GET</span> user/$user_id/edit
-        </li>
-        <li>
-          <span class="method-request method-get">GET</span>
-          user/$user_id/delete/user/$user_id/delete/user/$user_id/delete
-        </li>
-        <li>
-          <span class="method-request method-get">GET</span> users
-        </li>
-        <li>
-          <span class="method-request method-get">GET</span> user/$user_id
-        </li>
-        <li>
-          <span class="method-request method-get">GET</span> user/$user_id
-        </li>
-        <li>
-          <span class="method-request method-post">POST</span> user/$user_id
-        </li>
-        <li>
-          <span class="method-request method-get">GET</span> users
-        </li>
-        <li>
-          <span class="method-request method-get">GET</span> user/$user_id
-        </li>
-        <li>
-          <span class="method-request method-post">POST</span> user/$user_id
-        </li>
-        <li>
-          <span class="method-request method-get">GET</span> users
-        </li>
-        <li>
-          <span class="method-request method-get">GET</span> user/$user_id
-        </li>
-        <li>
-          <span class="method-request method-post">POST</span> user/$user_id
-        </li>
-        <li>
-          <span class="method-request method-get">GET</span> user/$user_id/edit
+        <li v-for="a in apis" @click="editApi(a)" :class="{active: api.id === a.id}">
+          <span class="method-request method-get">{{a.request_type}}</span> {{a.slug}}
         </li>
       </ul>
+      <!--
       <button class="btn btn-success col-12 api-list-export-button">
         <svg x="0px" y="0px"
              viewBox="0 0 512 512" style="enable-background:new 0 0 20 20; height: 18px;fill: #FFF; margin-top: -5px;"
@@ -102,25 +53,46 @@
 
         &nbsp;EXPORT
       </button>
+      -->
+      <button class="btn btn-success col-12 api-list-export-button">
+        <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+             viewBox="0 0 368.008 368.008" style="enable-background:new 0 0 20 20; height: 18px; fill: #FFF; margin-top: -5px;" xml:space="preserve">
+
+	<g>
+		<path d="M368,88.004c0-1.032-0.224-2.04-0.6-2.976c-0.152-0.376-0.416-0.664-0.624-1.016c-0.272-0.456-0.472-0.952-0.832-1.352
+			l-72.008-80c-1.512-1.688-3.672-2.656-5.944-2.656h-15.648c-0.232,0-0.472,0-0.704,0H151.992c-13.232,0-24,10.768-24,24v40H24
+			c-13.232,0-24,10.768-24,24v256c0,13.232,10.768,24,24,24h192c13.232,0,24-10.768,24-24v-40h104c13.232,0,24-10.768,24-24v-175.96
+			c0-0.016,0.008-0.024,0.008-0.04L368,88.004z M224,344.004c0,4.408-3.592,8-8,8H24c-4.408,0-8-3.592-8-8v-256c0-4.408,3.592-8,8-8
+			h104v88c0,4.416,3.584,8,8,8h88V344.004z M224,160.004h-80v-80h4.688L224,155.324V160.004z M352,280.004c0,4.416-3.592,8-8,8H240
+			v-119.64c0-0.12,0.008-0.24,0.008-0.36l-0.008-16c0,0,0-0.008,0-0.024c-0.008-2.12-0.832-4.04-2.184-5.464
+			c0-0.016-0.024-0.016-0.016-0.016c0,0-0.008-0.008-0.008-0.016c-0.008,0-0.016-0.008-0.016-0.016
+			c-0.032-0.032-0.072-0.072-0.112-0.112l-80-80c-1.504-1.504-3.544-2.352-5.664-2.352h-8.008v-40c0-4.408,3.592-8,8-8h112v88
+			c0,4.416,3.584,8,8,8H352V280.004z M352,96.004h-72.008v-80h4.44L352,91.076V96.004z"/>
+	</g>
+
+</svg>
+
+        &nbsp;DOCUMNET
+      </button>
     </div>
     <div class="container pt-3">
       <div class="row justify-content-center">
         <div class="col-md-12">
           <div class="pb-1 mb-2 my-breadcrumb">
-            <span>{{project}}</span>
+            <span>{{project.name}}</span>
             <svg width="0.6em" height="0.6em" viewBox="0 0 16 16" class="bi bi-caret-right-fill" fill="currentColor"
                  xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M12.14 8.753l-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
             </svg>
-            <span>{{version}}</span>
+            <span>{{version.name}}</span>
             <svg width="0.6em" height="0.6em" viewBox="0 0 16 16" class="bi bi-caret-right-fill" fill="currentColor"
                  xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M12.14 8.753l-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
             </svg>
-            <span v-if="api_id !== 'new' && api_id === api.id">edit</span>
-            <span v-else>new api</span>
+            <span v-if="api.id > 0">edit</span>
+            <span v-else>new</span>
           </div>
           <form class="form-inline">
             <div class="col-sm-1 p-0 pr-1">
@@ -135,7 +107,7 @@
               <label class="sr-only" for="slug">Username</label>
               <div class="input-group mb-2">
                 <div class="input-group-prepend">
-                  <div class="input-group-text">/{{project}}/{{version}}/</div>
+                  <div class="input-group-text">/{{project.name}}/{{version.name}}/</div>
                 </div>
                 <input type="text" class="form-control" id="slug" placeholder="user/$user_id/edit" v-model="api.slug">
               </div>
@@ -147,7 +119,9 @@
             <textarea class="form-control col-12" placeholder="Detail description of this API"
                       v-model="api.description">{{api.description}}</textarea>
           </form>
-          {{sendString}}
+          <div class="bg-danger text-white p-2 mt-2" v-if="saveApiError.message !== ''">
+           {{saveApiError.message}}
+          </div>
           <div class="pt-3">
             <ul class="api-tabs">
               <li @click="()=>{tab = 'params'}" :class="{active: tab === 'params'}">Params</li>
@@ -169,12 +143,13 @@
               </tr>
               </thead>
               <tbody>
-              <tr v-for="(param, index) in params" :key="index">
+              <tr v-for="(param, index) in params">
                 <td>
                   <select class="form-control" v-model="param.type">
                     <option value="GET">GET</option>
-                    <option value="GET">POST</option>
-                    <option value="GET">HEADER</option>
+                    <option value="POST">POST</option>
+                    <option value="HEADER">HEADER</option>
+                    <option value="URL">URL</option>
                   </select>
                 </td>
                 <td>
@@ -185,17 +160,17 @@
                          v-model="param.description"/>
                 </td>
                 <td>
-                                <textarea class="form-control" rows="1"
-                                          placeholder="Type validator name. Ex: numeric|password ">{{param.validators.join(', ')}}</textarea>
+                  <textarea class="form-control" rows="1"
+                            placeholder="Type validator name. Ex: numeric|password ">{{param.validators.join(', ')}}</textarea>
                 </td>
                 <td class="text-center" style="vertical-align: middle">
-                                <span class="api-delete-button">
-                                    <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash-fill"
-                                         fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                            <path fill-rule="evenodd"
-                                                  d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5a.5.5 0 0 0-1 0v7a.5.5 0 0 0 1 0v-7z"/>
-                                    </svg>
-                                </span>
+                  <span class="api-delete-button">
+                      <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash-fill"
+                           fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                              <path fill-rule="evenodd"
+                                    d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5a.5.5 0 0 0-1 0v7a.5.5 0 0 0 1 0v-7z"/>
+                      </svg>
+                  </span>
                 </td>
               </tr>
               </tbody>
@@ -209,24 +184,41 @@
 <script>
   //import VueJsonPretty from 'vue-json-pretty'
 
+  class Project {
+    constructor() {
+      this.id = 0
+      this.name = ""
+      this.description = ""
+    }
+  }
+
+  class Version {
+    constructor() {
+      this.id = 0
+      this.name = ""
+      this.description = ""
+    }
+  }
+
   class Api {
     constructor() {
-      this.id = 0;
-      this.slug = "users";
-      this.description = "Mô tả Api users";
-      this.request_type = "GET";
-      this.response = "Nội dung cần trà về";
+      this.id = 0
+      this.slug = ""
+      this.description = ""
+      this.version_id = 0
+      this.request_type = "GET"
+      this.response = ""
     }
   }
 
   class Param {
     constructor() {
-      this.name = "username";
-      this.description = "Mô tả username";
-      this.type = "GET";
-      this.removable = true;
-      this.api_id = 0;
-      this.required = true;
+      this.name = ""
+      this.description = ""
+      this.type = "GET"
+      this.removable = true
+      this.api_id = 0
+      this.required = true
       this.validators = ['required']
     }
   }
@@ -235,40 +227,97 @@
     //components: {VueJsonPretty},
     data() {
       return {
-        project: this.$route.params.project,
-        version: this.$route.params.version,
-        api_id: this.$route.params.id,
-
-        tab: "params",
+        projects: [],
+        project: new Project(),
+        versions: [],
+        version: new Version(),
+        apis: [],
         api: new Api(),
         params: [new Param(), new Param(), new Param()],
 
-        sendString: ""
+        tab: "params",
+        saveApiError: {'status': 'error','message': ''}
       }
     },
     mounted() {
+      this.$axios.get('/projects').then(response => {
+        this.projects = response.data.data
+        let project = {}
+        let version = {}
+        if (this.projects.length > 0) {
+          project = this.projects.find(element => element.name === this.$route.params.project)
+          if (project !== undefined) {
+            version = project.versions.find(element => element.name === this.$route.params.version)
+          }
+        }
+        if (project === undefined || version === undefined) {
+          this.$router.push('/404')
+        } else {
+          this.project = project
+          this.version = version
+          this.api.version_id = version.id
+        }
+      }).catch(error => {
+        alert("Cannot load project list. Press F5 to try again: " + error)
+      })
+    },
+    watch: {
+      version: function(newVal, oldVal) {
+        this.$axios.get('/version_apis/'+newVal.id).then(response => {
+          this.apis = response.data.data
+        }).catch(error => {
+          alert("Cannot load api list. Press F5 to try again: " + error)
+        })
+      }
     },
     methods: {
-      save() {
-        this.sendString = JSON.stringify({
-          api: this.api,
-          params: this.params,
-          response: "",
-        });
-
-        let self = this;
-        let sendData = {"version_id": this.version, "api": this.api, "params": this.params};
-        this.$axios.post('http://localhost/mock_api/api/api/save', sendData).then(response => {
+      newApi() {
+        let newApi = new Api()
+        newApi.version_id = this.version.id
+        this.api = newApi
+      },
+      editApi(api) {
+        this.api = api;
+        this.$axios.get('api/'+api.id).then(response => {
           if (response.data.status === "success") {
-            console.log("Gọi API lưu thành công");
-            console.log(response.data.data)
-            //this.$router.push({name: 'blog-id', params: {id: response.data.data.id}});
+
+            // Map response params from server to state params
+            let params = []
+            for(let i = 0; i < response.data.data.params.length; i++) {
+              let temp = response.data.data.params[i];
+              let param = new Param()
+              for(let j = 0; j < Object.keys(param).length; j++) {
+                if(typeof temp[Object.keys(param)[j]] !== 'undefined') {
+                  param[Object.keys(param)[j]] = temp[Object.keys(param)[j]];
+                }
+              }
+              params.push(param);
+            }
+            // Update state
+            this.params = params
           } else {
-            console.log("Gọi API lưu bị lỗi");
-            console.log(response.data.message)
+            this.saveApiError = response.data;
           }
         }).catch(error => {
-          alert("Lỗi lưu bài viết: " + error);
+          alert("Lỗi lấy API: " + error)
+        })
+      },
+      save() {
+        let self = this
+        let sendData = {"api": this.api, "params": this.params}
+        this.$axios.post('api/save', sendData).then(response => {
+          if (response.data.status === "success") {
+            window.location.reload();
+
+            // TODO: Thêm thông tin API vừa lưu vào danh sách API ở sidebar
+            //this.api = new Api();
+            //this.apis.shift(response.data.data);
+            this.saveApiError = {'status': 'success', 'message': ''};
+          } else {
+            this.saveApiError = response.data;
+          }
+        }).catch(error => {
+          alert("Lỗi lưu API: " + error)
         })
       }
     }
@@ -339,8 +388,7 @@
   }
 
   .api-list li {
-    padding: 10px;
-    padding-right: 12px;
+    padding: 10px 12px 10px 10px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

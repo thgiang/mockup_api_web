@@ -46,7 +46,7 @@
     background: hsla(0,0%,100%,.125);
     display: inline-block;
     float: left;
-    margin: 12px 0 0 5px;
+    margin: 10px 0 0 5px;
     padding: 2px 8px 4px 8px;
     border-radius: 3px;
   }

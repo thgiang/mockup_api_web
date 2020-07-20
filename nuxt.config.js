@@ -59,7 +59,7 @@ export default {
   ],
   axios: {
     //proxyHeaders: true,
-    proxy: true,
+    //proxy: true,
     baseURL: 'http://localhost/mock_api/api/',
     'Access-Control-Allow-Origin': '*',
     headers: {
@@ -67,6 +67,7 @@ export default {
       'Content-Type': 'application/json'
     }
   },
+
   /*
   ** Build configuration
   ** See https://nuxtjs.org/api/configuration-build/
