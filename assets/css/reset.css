@@ -32,6 +32,12 @@ a:hover {
 .btn:focus {
   box-shadow: none;
 }
+.btn-outline-success {
+  border-color: #069255;
+}
+.btn-outline-success:hover {
+  background: #069255;
+}
 .table-bordered thead th {
   border-bottom: none;
 }

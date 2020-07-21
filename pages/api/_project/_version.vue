@@ -102,7 +102,7 @@
             <div class="col-sm-1 p-0 pr-1">
               <label class="sr-only" for="request_type">Request type</label>
               <select name="request_type" id="request_type" class="form-control col-12 mb-2 mr-sm-2" style="width: 100%"
-                      v-model="api.request_type">
+                      v-model="api.request_type" @change="updateApiType()">
                 <option value="GET">GET</option>
                 <option value="POST">POST</option>
               </select>
@@ -123,19 +123,20 @@
             <textarea class="form-control col-12" placeholder="Detail description of this API"
                       v-model="api.description">{{api.description}}</textarea>
           </form>
-          <div class="bg-danger text-white p-2 mt-2" v-if="saveApiError.message !== ''">
-            {{saveApiError.message}}
+          <div class="bg-danger text-white p-2 mt-2" v-if="notice.message !== ''">
+            {{notice.message}}
           </div>
           <div class="pt-3">
             <ul class="api-tabs">
               <li @click="()=>{tab = 'params'}" :class="{active: tab === 'params'}">Params</li>
+              <li @click="()=>{tab = 'headers'}" :class="{active: tab === 'headers'}">Headers</li>
               <li @click="()=>{tab = 'response'}" :class="{active: tab === 'response'}">Response</li>
             </ul>
           </div>
           <div class="" v-if="tab === 'response'">
             <textarea rows="12" class="form-control" placeholder="Response content" v-model="api.response"></textarea>
           </div>
-          <div class="" v-if="tab === 'params'">
+          <div class="" v-if="tab === 'params' || tab === 'headers'">
             <table class="table table-bordered">
               <thead>
               <tr>
@@ -147,14 +148,15 @@
               </tr>
               </thead>
               <tbody>
-              <tr v-for="(param, index) in params">
+              <tr v-for="(param, index) in params"
+                  v-if="(param.type !== 'HEADER' && tab !== 'headers') || (param.type === 'HEADER' && tab === 'headers')">
                 <td>
-                  <select class="form-control" v-model="param.type">
+                  <select class="form-control" v-model="param.type" v-if="tab !== 'headers'">
                     <option value="GET">GET</option>
-                    <option value="POST">POST</option>
-                    <option value="HEADER">HEADER</option>
+                    <option value="POST" v-if="api.request_type === 'POST'">POST</option>
                     <option value="URL">URL</option>
                   </select>
+                  <div v-else class="disabled" style="padding: 8px 0 0 8px">HEADER</div>
                 </td>
                 <td>
                   <input class="form-control" placeholder="Parameter name a-zA-Z0-9_-" v-model="param.name"/>
@@ -164,17 +166,40 @@
                          v-model="param.description"/>
                 </td>
                 <td>
-                  <textarea class="form-control" rows="1"
-                            placeholder="Type validator name. Ex: numeric|password ">{{param.validators.join(', ')}}</textarea>
+                  <CustomVueMultiselect multiple
+                                        v-model="param.validators"
+                                        :options="validators"
+                                        selectedLabel="Selected"
+                                        selectLabel="Select"
+                                        deselectLabel="Remove"
+                                        placeholder="Select validators"
+                                        :internal-search="false"
+                                        @input="updateValidators()"
+                  />
                 </td>
                 <td class="text-center" style="vertical-align: middle">
-                  <span class="api-delete-button">
+                  <span class="api-delete-button" @click="()=>{params.splice(index, 1)}">
                       <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash-fill"
                            fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                               <path fill-rule="evenodd"
                                     d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5a.5.5 0 0 0-1 0v7a.5.5 0 0 0 1 0v-7z"/>
                       </svg>
                   </span>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="5" class="text-center">
+                  <button class="btn btn-outline-success btn-add-new-param p-2 col-12"
+                          style="line-height: 0.8rem; padding: 3px 10px" @click="newParam(tab)">
+                    <svg width="0.8em" height="0.8em" viewBox="0 0 16 16" class="bi bi-plus-circle-fill"
+                         fill="currentColor"
+                         style="margin-top: -2px"
+                         xmlns="http://www.w3.org/2000/svg">
+                      <path fill-rule="evenodd"
+                            d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4a.5.5 0 0 0-1 0v3.5H4a.5.5 0 0 0 0 1h3.5V12a.5.5 0 0 0 1 0V8.5H12a.5.5 0 0 0 0-1H8.5V4z"/>
+                    </svg>
+                    ADD NEW
+                  </button>
                 </td>
               </tr>
               </tbody>
@@ -227,8 +252,10 @@
     }
   }
 
+  import CustomVueMultiselect from '~/components/custom-vue-multiselect/Multiselect.vue'
+
   export default {
-    //components: {VueJsonPretty},
+    components: {CustomVueMultiselect},
     data() {
       return {
         projects: [],
@@ -238,14 +265,19 @@
         apis: [],
         api: new Api(),
         params: [new Param(), new Param(), new Param()],
+        validators: [],
 
         tab: "params",
-        saveApiError: {'status': 'error', 'message': ''}
+        notice: {'status': 'error', 'message': ''}
       }
     },
     mounted() {
       this.$axios.get('/projects').then(response => {
         this.projects = response.data.data
+        if (this.projects.length === 0) {
+          this.$router.push('/projects')
+        }
+
         let project = {}
         let version = {}
         if (this.projects.length > 0) {
@@ -266,6 +298,19 @@
       })
     },
     watch: {
+      project: function (newVal, oldVal) {
+        if (newVal.id > 0) {
+          this.$axios.get('/project_validators/' + this.project.id).then(response => {
+            let validators = []
+            for (let i = 0; i < response.data.data.length; i++) {
+              validators.push(response.data.data[i].name)
+            }
+            this.validators = validators
+          }).catch(error => {
+            alert("Cannot load validators list. Press F5 to try again: " + error)
+          })
+        }
+      },
       version: function (newVal, oldVal) {
         this.$axios.get('/version_apis/' + newVal.id).then(response => {
           this.apis = response.data.data
@@ -275,6 +320,29 @@
       }
     },
     methods: {
+      updateApiType() {
+        if(this.api.request_type === 'GET') {
+          for(let i = 0; i < this.params.length; i++) {
+            if(this.params[i].type === 'POST') {
+              this.params[i].type = 'GET'
+            }
+          }
+          this.$forceUpdate()
+        }
+      },
+      newParam(tab) {
+        let newParam = new Param()
+        if (tab === 'headers') {
+          newParam.type = 'HEADER'
+        } else {
+          newParam.type = this.api.request_type
+        }
+
+        this.params.push(newParam)
+      },
+      updateValidators() {
+        console.log("Validators list is updated");
+      },
       newApi() {
         let newApi = new Api()
         newApi.version_id = this.version.id
@@ -300,7 +368,7 @@
             // Update state
             this.params = params
           } else {
-            this.saveApiError = response.data;
+            this.notice = response.data;
           }
         }).catch(error => {
           alert("Lỗi lấy API: " + error)
@@ -316,9 +384,9 @@
             // TODO: Thêm thông tin API vừa lưu vào danh sách API ở sidebar
             //this.api = new Api();
             //this.apis.shift(response.data.data);
-            this.saveApiError = {'status': 'success', 'message': ''};
+            this.notice = {'status': 'success', 'message': ''};
           } else {
-            this.saveApiError = response.data;
+            this.notice = response.data;
           }
         }).catch(error => {
           alert("Lỗi lưu API: " + error)
@@ -328,6 +396,18 @@
   }
 </script>
 <style scoped>
+  .btn-add-new-param {
+    /*border-color: #dee2e6 !important;*/
+    border-color: #f3f3f3 !important;
+  }
+  .btn-add-new-param:hover, .btn-add-new-param:focus, .btn-add-new-param:active {
+    border-color: #f3f3f3 !important;
+    background: #FFF !important;
+    color: green !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
   .custom-project-select, select {
     padding: 2px;
   }
