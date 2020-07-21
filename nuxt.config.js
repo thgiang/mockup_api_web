@@ -67,7 +67,10 @@ export default {
       'Content-Type': 'application/json'
     }
   },
-
+  loading: {
+    color: 'red',
+    height: '2px'
+  },
   /*
   ** Build configuration
   ** See https://nuxtjs.org/api/configuration-build/

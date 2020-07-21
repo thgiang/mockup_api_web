@@ -56,7 +56,7 @@
         &nbsp;EXPORT
       </button>
       -->
-      <button class="btn btn-success col-12 api-list-export-button">
+      <button class="btn btn-success col-12 api-list-export-button" @click="$router.push({name: 'docs-project-version', params: {'project': project.name, 'version': version.name}})">
         <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
              x="0px" y="0px"
              viewBox="0 0 368.008 368.008"
@@ -101,7 +101,7 @@
           <form class="form-inline">
             <div class="col-sm-1 p-0 pr-1">
               <label class="sr-only" for="request_type">Request type</label>
-              <select name="request_type" id="request_type" class="form-control col-12 mb-2 mr-sm-2" style="width: 100%"
+              <select name="request_type" id="request_type" class="form-control col-12 mb-2 mr-sm-2" style="width: 100%; padding: 0 10px;"
                       v-model="api.request_type" @change="updateApiType()">
                 <option value="GET">GET</option>
                 <option value="POST">POST</option>
@@ -140,11 +140,12 @@
             <table class="table table-bordered">
               <thead>
               <tr>
-                <th style="width: 10%;">Type</th>
+                <th style="width: 10%;">Method</th>
                 <th style="width: 20%;">Name</th>
-                <th style="width: 30%">Description</th>
-                <th style="width: 30%">Validate</th>
-                <th style="width: 10%" class="text-center">Action</th>
+                <th style="width: 40%">Description</th>
+                <th style="width: 20%">Data Type</th>
+                <th style="width: 5%">Required</th>
+                <th style="width: 5%" class="text-center">Action</th>
               </tr>
               </thead>
               <tbody>
@@ -166,16 +167,21 @@
                          v-model="param.description"/>
                 </td>
                 <td>
-                  <CustomVueMultiselect multiple
+                  <CustomVueMultiselect
                                         v-model="param.validators"
                                         :options="validators"
                                         selectedLabel="Selected"
                                         selectLabel="Select"
                                         deselectLabel="Remove"
-                                        placeholder="Select validators"
+                                        placeholder="Data type validator"
                                         :internal-search="false"
                                         @input="updateValidators()"
                   />
+                </td>
+                <td class="text-center" style="vertical-align: middle; cursor: pointer" @click="() => {param.required = !param.required}">
+                    <div class="my-form-check-input">
+                      <template v-if="param.required">✓</template>
+                    </div>
                 </td>
                 <td class="text-center" style="vertical-align: middle">
                   <span class="api-delete-button" @click="()=>{params.splice(index, 1)}">
@@ -188,7 +194,7 @@
                 </td>
               </tr>
               <tr>
-                <td colspan="5" class="text-center">
+                <td colspan="6" class="text-center">
                   <button class="btn btn-outline-success btn-add-new-param p-2 col-12"
                           style="line-height: 0.8rem; padding: 3px 10px" @click="newParam(tab)">
                     <svg width="0.8em" height="0.8em" viewBox="0 0 16 16" class="bi bi-plus-circle-fill"
@@ -248,7 +254,7 @@
       this.removable = true
       this.api_id = 0
       this.required = true
-      this.validators = ['required']
+      this.validators = []
     }
   }
 
@@ -305,6 +311,8 @@
             for (let i = 0; i < response.data.data.length; i++) {
               validators.push(response.data.data[i].name)
             }
+            // Remove 'required' from array
+            validators = validators.filter(function(e) { return e !== 'required' })
             this.validators = validators
           }).catch(error => {
             alert("Cannot load validators list. Press F5 to try again: " + error)
@@ -347,6 +355,7 @@
         let newApi = new Api()
         newApi.version_id = this.version.id
         this.api = newApi
+        this.params = [new Param()]
       },
       editApi(api) {
         this.api = api;
@@ -363,6 +372,13 @@
                   param[Object.keys(param)[j]] = temp[Object.keys(param)[j]];
                 }
               }
+              // Lọc bỏ cái required vì đang tách nó ra làm 1 field riêng
+              if(param.validators.includes('required')) {
+                param.validators = param.validators.filter(function(e) { return e !== 'required' })
+                param.required = true;
+              } else {
+                param.required = false;
+              }
               params.push(param);
             }
             // Update state
@@ -376,7 +392,13 @@
       },
       save() {
         let self = this
-        let sendData = {"api": this.api, "params": this.params}
+        let params = this.params;
+        for(let i = 0; i < this.params.length; i++) {
+          if(params[i].required === true) {
+            params[i].validators.push('required')
+          }
+        }
+        let sendData = {"api": this.api, "params": params}
         this.$axios.post('api/save', sendData).then(response => {
           if (response.data.status === "success") {
             window.location.reload();
@@ -544,5 +566,18 @@
 
   .api-delete-button:hover {
     color: #333;
+  }
+
+  .my-form-check-input {
+    border: 1px solid #ced4da;
+    width: 17px;
+    height: 16px;
+    display: block;
+    line-height: 14px;
+    margin: 0 auto;
+    font-size: 12px;
+    cursor: pointer;
+    color: #069255;
+    font-weight: bold;
   }
 </style>
