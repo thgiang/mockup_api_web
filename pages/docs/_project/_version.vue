@@ -119,11 +119,7 @@
             <blockquote>
               <p>EXAMPLE</p>
             </blockquote>
-            <pre><div class="copy">Copy</div><code>curl --location --request {{api.request_type}} 'https://mock-api.ghtk.vn/api/{{project.name}}/{{version.name}}/{{api.slug}}' \
---header 'hihi: hoho' \
---header 'hihi: haha' \
---form 'email=sdfsdf' \
---form '='</code></pre>
+            <pre><div class="copy">Copy</div><code>{{api.example}}</code></pre>
           </section>
         </div>
       </div>
@@ -157,6 +153,7 @@
       this.version_id = 0
       this.request_type = "GET"
       this.response = ""
+      this.example = ""
     }
   }
 
@@ -244,10 +241,13 @@
     },
     methods: {
       loadApi(api) {
-        this.api = api;
+        if(api.id === this.api.id) {
+          return;
+        }
+        //this.api = api;
         this.$axios.get('api/' + api.id).then(response => {
           if (response.data.status === "success") {
-
+            this.api = response.data.data
             // Map response params from server to state params
             let params = []
             for (let i = 0; i < response.data.data.params.length; i++) {
