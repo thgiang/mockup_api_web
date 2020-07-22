@@ -79,13 +79,11 @@
               </thead>
               <tbody>
                 <tr v-for="param in params">
-                  <td>{{param.type}}</td>
+                  <td>{{param.request_type}}</td>
                   <td>{{param.name}}</td>
-                  <td><template v-if="param.validators.includes('required')">Yes</template><template v-else>No</template></td>
+                  <td><template v-if="param.required">Yes</template><template v-else>No</template></td>
                   <td>
-                      <div v-for="validator in param.validators" v-if="validator !== 'required'">
-                        {{validator}}
-                      </div>
+                        <strong>{{param.validator.name}}</strong>: {{param.validator.description}}
                   </td>
                   <td>{{param.description}}</td>
                 </tr>
@@ -107,8 +105,12 @@
               <p>FAIL</p>
             </blockquote>
             <pre><div class="copy">Copy</div><code>{
-  status: 'error',
-  message: 'Error content'
+  "status":"error",
+  "message":"Error content",
+  "errors":{
+    "param_name_1":"Validate error text 1",
+    "param_name_2":"Validate error text 2"
+  }
 }</code></pre>
           </section>
 
@@ -162,12 +164,11 @@
     constructor() {
       this.name = ""
       this.description = ""
-      this.type = "GET"
+      this.request_type = "GET"
       this.removable = true
       this.api_id = 0
       this.required = true
-      this.validators = ['required']
-      this.validator_maps = []
+      this.validator = {}
     }
   }
 

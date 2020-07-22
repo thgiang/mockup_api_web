@@ -150,9 +150,9 @@
               </thead>
               <tbody>
               <tr v-for="(param, index) in params"
-                  v-if="(param.type !== 'HEADER' && tab !== 'headers') || (param.type === 'HEADER' && tab === 'headers')">
+                  v-if="(param.request_type !== 'HEADER' && tab !== 'headers') || (param.request_type === 'HEADER' && tab === 'headers')">
                 <td>
-                  <select class="form-control" v-model="param.type" v-if="tab !== 'headers'">
+                  <select class="form-control" v-model="param.request_type" v-if="tab !== 'headers'">
                     <option value="GET">GET</option>
                     <option value="POST" v-if="api.request_type === 'POST'">POST</option>
                     <option value="URL">URL</option>
@@ -168,14 +168,16 @@
                 </td>
                 <td>
                   <CustomVueMultiselect
-                                        v-model="param.validators"
+                                        v-model="param.validator"
                                         :options="validators"
+                                        track-by="id"
+                                        label="name"
                                         selectedLabel="Selected"
                                         selectLabel="Select"
                                         deselectLabel="Remove"
                                         placeholder="Data type validator"
                                         :internal-search="false"
-                                        @input="updateValidators()"
+                                        @input="updateValidator(param)"
                   />
                 </td>
                 <td class="text-center" style="vertical-align: middle; cursor: pointer" @click="() => {param.required = !param.required}">
@@ -250,11 +252,11 @@
     constructor() {
       this.name = ""
       this.description = ""
-      this.type = "GET"
+      this.request_type = "GET"
       this.removable = true
       this.api_id = 0
       this.required = true
-      this.validators = []
+      this.validator = {}
     }
   }
 
@@ -307,13 +309,7 @@
       project: function (newVal, oldVal) {
         if (newVal.id > 0) {
           this.$axios.get('/project_validators/' + this.project.id).then(response => {
-            let validators = []
-            for (let i = 0; i < response.data.data.length; i++) {
-              validators.push(response.data.data[i].name)
-            }
-            // Remove 'required' from array
-            validators = validators.filter(function(e) { return e !== 'required' })
-            this.validators = validators
+            this.validators = response.data.data
           }).catch(error => {
             alert("Cannot load validators list. Press F5 to try again: " + error)
           })
@@ -331,8 +327,8 @@
       updateApiType() {
         if(this.api.request_type === 'GET') {
           for(let i = 0; i < this.params.length; i++) {
-            if(this.params[i].type === 'POST') {
-              this.params[i].type = 'GET'
+            if(this.params[i].request_type === 'POST') {
+              this.params[i].request_type = 'GET'
             }
           }
           this.$forceUpdate()
@@ -341,15 +337,15 @@
       newParam(tab) {
         let newParam = new Param()
         if (tab === 'headers') {
-          newParam.type = 'HEADER'
+          newParam.request_type = 'HEADER'
         } else {
-          newParam.type = this.api.request_type
+          newParam.request_type = this.api.request_type
         }
 
         this.params.push(newParam)
       },
-      updateValidators() {
-        console.log("Validators list is updated");
+      updateValidator(param) {
+
       },
       newApi() {
         let newApi = new Api()
@@ -372,13 +368,6 @@
                   param[Object.keys(param)[j]] = temp[Object.keys(param)[j]];
                 }
               }
-              // Lọc bỏ cái required vì đang tách nó ra làm 1 field riêng
-              if(param.validators.includes('required')) {
-                param.validators = param.validators.filter(function(e) { return e !== 'required' })
-                param.required = true;
-              } else {
-                param.required = false;
-              }
               params.push(param);
             }
             // Update state
@@ -391,14 +380,7 @@
         })
       },
       save() {
-        let self = this
-        let params = this.params;
-        for(let i = 0; i < this.params.length; i++) {
-          if(params[i].required === true) {
-            params[i].validators.push('required')
-          }
-        }
-        let sendData = {"api": this.api, "params": params}
+        let sendData = {"api": this.api, "params": this.params}
         this.$axios.post('api/save', sendData).then(response => {
           if (response.data.status === "success") {
             window.location.reload();
