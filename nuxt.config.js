@@ -1,5 +1,6 @@
 
 export default {
+  middleware: ['auth'],
   /*
   ** Nuxt rendering mode
   ** See https://nuxtjs.org/api/configuration-mode
@@ -56,6 +57,7 @@ export default {
     // Doc: https://bootstrap-vue.js.org
     'bootstrap-vue/nuxt',
     '@nuxtjs/axios',
+    '@nuxtjs/auth-next'
   ],
   axios: {
     //proxyHeaders: true,
@@ -65,6 +67,21 @@ export default {
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
+    }
+  },
+  auth: {
+    strategies: {
+      'laravelJWT': {
+        provider: 'laravel/jwt',
+        url: 'http://localhost/mock_api',
+        token: {
+          property: 'access_token',
+          maxAge: 60 * 60
+        },
+        refreshToken: {
+          maxAge: 20160 * 60
+        },
+      }
     }
   },
   loading: {

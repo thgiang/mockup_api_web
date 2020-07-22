@@ -12,18 +12,20 @@
         <div class="col-sm-5">
           <form class="login-form p-4 bg-white text-dark">
             <div class="form-group">
-              <label for="exampleInputEmail1">Email address</label>
-              <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
-                     placeholder="Enter email">
-              <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+              <label for="username">Your username</label>
+              <input type="text" class="form-control" id="username" aria-describedby="usernameHelp"
+                     placeholder="GHTK username" v-model="username">
+              <small id="usernameHelp" class="form-text text-muted">Please use GHTK.VN account.</small>
             </div>
             <div class="form-group">
               <label for="exampleInputPassword1">Password</label>
-              <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+              <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password" v-model="password">
             </div>
-            <button type="submit" class="btn btn-success col-12 mb-2">Login</button>
+            <button type="button" class="btn btn-success col-12 mb-2" @click="login()">Login</button>
+            <!--
             <nuxt-link to="/">Create a new account</nuxt-link>
             <nuxt-link to="/" class="float-right">Forgot password?</nuxt-link>
+            -->
           </form>
         </div>
       </div>
@@ -31,7 +33,25 @@
   </div>
 </template>
 <script>
-  export default {}
+  export default {
+    auth: false,
+    data() {
+      return {
+        username: '',
+        password: ''
+      }
+    },
+    methods: {
+      login() {
+        this.$auth.loginWith('laravelJWT', {
+          data: {
+            email: this.username+"@ghtk.vn",
+            password: this.password
+          }
+        })
+      }
+    }
+  }
 </script>
 <style scoped>
   .login-section {

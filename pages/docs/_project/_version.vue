@@ -40,7 +40,7 @@
             <blockquote>
               <p>REQUEST</p>
             </blockquote>
-            <pre><div class="copy">Copy</div><code>{{api.request_type}} /api/{{project.name}}/{{version.name}}/{{api.slug}}</code></pre>
+            <pre><div class="copy" @click="copyText('#request_'+api.id, $event)">Copy</div><code :id="'request_'+api.id">{{api.request_type}} /api/{{project.name}}/{{version.name}}/{{api.slug}}</code></pre>
           </section>
 
           <!-- SECTION PARAMS -->
@@ -77,15 +77,15 @@
             <blockquote>
               <p>SUCCESS</p>
             </blockquote>
-            <pre><div class="copy">Copy</div><code>{{api.response}}</code></pre>
+            <pre><div class="copy" @click="copyText('#success_'+api.id, $event)">Copy</div><code :id="'success_'+api.id">{{api.response}}</code></pre>
           </section>
 
           <!-- SECTION FAIL -->
-          <section class="section pt-3 section-success">
+          <section class="section pt-3 section-fail">
             <blockquote>
               <p>FAIL</p>
             </blockquote>
-            <pre><div class="copy">Copy</div><code>{
+            <pre><div class="copy" @click="copyText('#fail_'+api.id, $event)">Copy</div><code :id="'fail_'+api.id">{
   "status":"error",
   "message":"Error content",
   "errors":{
@@ -96,11 +96,11 @@
           </section>
 
           <!-- SECTION EXAMPLE -->
-          <section class="section pt-3 section-success">
+          <section class="section pt-3 section-example">
             <blockquote>
               <p>EXAMPLE</p>
             </blockquote>
-            <pre><div class="copy">Copy</div><code>{{api.example}}</code></pre>
+            <pre><div class="copy" @click="copyText('#example_'+api.id, $event)">Copy</div><code :id="'example_'+api.id">{{api.example}}</code></pre>
           </section>
         </div>
       </div>
@@ -222,6 +222,16 @@
       }
     },
     methods: {
+      copyText(div_id, $event) {
+        $event.target.innerHTML = 'Copied';
+        let codeToCopy = document.querySelector(div_id)
+        const el = document.createElement('textarea');
+        el.value = codeToCopy.textContent;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+      },
       loadApi(api) {
         if(api.id === this.api.id) {
           return;
