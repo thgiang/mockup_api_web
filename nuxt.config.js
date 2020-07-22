@@ -60,7 +60,7 @@ export default {
   axios: {
     //proxyHeaders: true,
     //proxy: true,
-    baseURL: 'http://localhost/mock_api/api/',
+    baseURL: 'http://localhost/mock_api/api',
     'Access-Control-Allow-Origin': '*',
     headers: {
       'Accept': 'application/json',
