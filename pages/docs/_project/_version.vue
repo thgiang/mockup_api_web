@@ -20,11 +20,11 @@
         <strong>API list</strong>
       </div>
       <ul class="api-list">
-        <li v-for="a in apis" @click="loadApi(a)" :class="{active: api.id === a.id}">
+        <li v-for="a in apis" @click="loadApi(a)" :href="'#api_'+api.id" :class="{active: api.id === a.id}">
           <span class="method-request method-get">{{a.request_type}}</span> {{a.slug}}
         </li>
       </ul>
-      <a class="btn btn-success col-12 api-list-export-button" :href="version.export_url" target="_blank">
+      <a class="btn btn-success col-12 api-list-export-button" :href="version.export_url+'?token='+token" target="_blank">
         <img src="~assets/images/postman.svg" style="height: 30px;">
       </a>
     </div>
@@ -157,6 +157,7 @@
     components: {CustomVueMultiselect},
     data() {
       return {
+        token: '',
         projects: [],
         project: new Project(),
         versions: [],
@@ -171,6 +172,7 @@
       }
     },
     mounted() {
+      this.token = this.$auth.$storage._state['_token.laravelJWT'].replace('Bearer ', '');
       this.$axios.get('/projects').then(response => {
         this.projects = response.data.data
         if (this.projects.length === 0) {
