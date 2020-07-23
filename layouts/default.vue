@@ -15,11 +15,29 @@
           </svg>
         </div>
       </div>
+      <div class="float-right pull-right" v-if="this.$auth.user">
+        <div class="user-info">
+          Hello, {{this.$auth.user.name}}
+          <a @click="logout()">(Thoát)</a>
+        </div>
+
+      </div>
     </div>
     <Nuxt/>
   </div>
 </template>
 <script>
+  export default {
+    methods: {
+      logout() {
+        if(this.$auth.loggedIn) {
+          this.$auth.logout().then(r => {
+            window.location.reload()
+          })
+        }
+      }
+    }
+  }
 </script>
 <style>
   body {
@@ -82,5 +100,16 @@
 
   .header-search ::-ms-input-placeholder { /* Microsoft Edge */
     color: rgba(255, 255, 255, 0.8);
+  }
+
+  .user-info {
+    line-height: 45px;
+    height: 50px;
+    padding: 0 10px 0 0;
+    color: #FFF;
+  }
+  .user-info a {
+    color: #EEE;
+    cursor: pointer;
   }
 </style>

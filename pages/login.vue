@@ -22,6 +22,7 @@
               <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password" v-model="password">
             </div>
             <button type="button" class="btn btn-success col-12 mb-2" @click="login()">Login</button>
+            <span class="bg-danger">{{notice}}</span>
             <!--
             <nuxt-link to="/">Create a new account</nuxt-link>
             <nuxt-link to="/" class="float-right">Forgot password?</nuxt-link>
@@ -35,18 +36,27 @@
 <script>
   export default {
     auth: false,
+    middleware: ['isLoggedIn'],
     data() {
       return {
+        notice: '',
         username: '',
         password: ''
       }
     },
     methods: {
       login() {
+        let that = this
         this.$auth.loginWith('laravelJWT', {
           data: {
             email: this.username+"@ghtk.vn",
             password: this.password
+          }
+        }).then(function() {
+          if(that.$auth.loggedIn) {
+            window.location.reload()
+          } else {
+            that.notice = 'Login không thành công';
           }
         })
       }
