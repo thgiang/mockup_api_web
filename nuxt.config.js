@@ -41,6 +41,8 @@ export default {
   ** https://nuxtjs.org/guide/plugins
   */
   plugins: [
+    '@/plugins/vue-notifications.js',
+    '@/plugins/font-awesome.js',
   ],
   /*
   ** Auto import components
@@ -50,8 +52,17 @@ export default {
   /*
   ** Nuxt.js dev-modules
   */
-  buildModules: [
+  buildModules:  [
+    ['@nuxtjs/fontawesome', {
+      component: 'fa',
+      suffix: true,
+    }]
   ],
+  fontawesome: {
+    icons: {
+      solid: true
+    }
+  },
   /*
   ** Nuxt.js modules
   */
@@ -62,32 +73,27 @@ export default {
     '@nuxtjs/auth-next'
   ],
   axios: {
-    //proxyHeaders: true,
-    //proxy: true,
-    baseURL: 'http://localhost/mock_api/api',
-    'Access-Control-Allow-Origin': '*',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    }
+    proxyHeaders: true,
+    proxy: true,
+    baseURL: 'http://thgiangapi.com/api',
   },
   auth: {
     strategies: {
       'laravelJWT': {
         provider: 'laravel/jwt',
-        url: 'http://localhost/mock_api',
+        url: 'http://thgiangapi.com',
         token: {
           property: 'access_token',
-          maxAge: 60 * 60
+          maxAge: 7 * 24 * 60 * 60
         },
         refreshToken: {
-          maxAge: 20160 * 60
+          maxAge: 7 * 24 * 60 * 60
         },
       }
     }
   },
   loading: {
-    color: 'red',
+    color: '#ffbc00',
     height: '2px'
   },
   /*

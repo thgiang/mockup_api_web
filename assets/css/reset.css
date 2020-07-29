@@ -7,41 +7,54 @@ html {
   -webkit-font-smoothing: antialiased;
   box-sizing: border-box;
 }
+
 body {
-  font-family: 'Roboto Condensed', sans-serif!important;
+  font-family: 'Roboto Condensed', sans-serif !important;
 }
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
   margin: 0;
 }
+
 a {
   color: #069255;
 }
+
 a:hover {
   color: #04b16f;;
   text-decoration: none;
 }
+
 .container-fluid, .container-sm, .container-md, .container-lg, .container-xl {
   padding-left: 5px;
   padding-right: 5px;
 }
+
 .btn-success {
   background: #069255;
 }
+
 .btn-success:hover {
   background: #098e59;
+}
+.btn-success:focus, .btn-success.focus {
+  background-color: #077f21;
 }
 .btn:focus {
   box-shadow: none;
 }
+
 .btn-outline-success {
   border-color: #069255;
 }
+
 .btn-outline-success:hover {
   background: #069255;
 }
+
 .table-bordered thead th {
   border-bottom: none;
 }
@@ -66,5 +79,85 @@ a:hover {
 }
 
 .input-group-text {
-  background-color: #f3f3f3!important;
+  background-color: #f3f3f3 !important;
+}
+
+
+.my-pagination {
+  list-style: none;
+}
+
+.my-pagination li {
+  display: inline-block;
+  color: #FFF;
+}
+
+.my-pagination li a {
+  color: #EEE;
+  padding: 3px 10px;
+  border: 1px solid #FFF;
+  background: #414845;
+}
+
+.my-pagination li a:focus {
+  outline: none;
+  color: white;
+}
+
+.my-pagination .active a {
+  background: #069255;
+}
+
+.my-pagination .disabled a {
+  background: #a9a9a9;
+  cursor: not-allowed;
+}
+
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: #CFCFCF !important;
+  opacity: 1; /* Firefox */
+}
+
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+  color: #CFCFCF !important;
+}
+
+::-ms-input-placeholder { /* Microsoft Edge */
+  color: #CFCFCF !important;
+}
+.sidebar-options {
+  border: 1px solid #ced4da;
+  border-radius: 3px;
+  padding: 0;
+}
+.sidebar-options ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sidebar-options li {
+  position: relative;
+  display: block;
+  padding: 8px 16px;
+  color: #1b1f23;
+  border-bottom: 1px solid #eaecef;
+}
+.sidebar-options li:first-child {
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+}
+.sidebar-options li:last-child {
+  border-bottom: 0;
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 6px;
+}
+.sidebar-options li.active {
+  border-left: 2px solid #069255;
+  padding-left: 14px;
+}
+.sidebar-options li:hover {
+  background: #EEE;
+}
+.sidebar-options li a {
+  cursor: pointer;
 }

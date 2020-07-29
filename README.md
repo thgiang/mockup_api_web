@@ -1,20 +1,14 @@
-# mock_api_web
+# Moshop Mock API Web
+```
+Mở file nuxt.config.js
+- Tìm baseURL sửa thành link của backend API (ví dụ: http://mock-api.ghtk.vn/api ko có dấu / ở cuối)
 
-## Build Setup
-
-```bash
-# install dependencies
-$ npm install
-
-# serve with hot reload at localhost:3000
-$ npm run dev
-
-# build for production and launch server
-$ npm run build
-$ npm run start
-
-# generate static project
-$ npm run generate
+- Tìm url (trong đoạn auth) sửa thành link backend (ví dụ: http://mock-api.ghtk.vn ko có dấu / ở cuối)
 ```
 
-For detailed explanation on how things work, check out [Nuxt.js docs](https://nuxtjs.org).
+### Chạy lệnh
+```npm install```
+
+```npm run dev```
+hoặc
+```npm run build```

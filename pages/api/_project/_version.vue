@@ -5,13 +5,13 @@
         <strong class="sidebar-label">Select project & version</strong>
         <div class="form-row p-2">
           <div class="col">
-            <select class="form-control custom-project-select" v-model="project">
+            <select class="form-control custom-project-select" v-model="select_project">
               <option v-for="pj in projects" :value="pj">{{pj.name}}</option>
             </select>
           </div>
           <div class="col">
-            <select class="form-control custom-project-select" v-model="version">
-              <option v-for="vs in project.versions" :value="vs">{{vs.name}}</option>
+            <select class="form-control custom-project-select" v-model="select_version">
+              <option v-for="vs in this.versions" :value="vs">{{vs.name}}</option>
             </select>
           </div>
         </div>
@@ -29,7 +29,10 @@
           ADD NEW
         </button>
       </div>
-      <ul class="api-list">
+      <div class="m-2 text-black-50" v-if="apis.length === 0">
+        API list is empty
+      </div>
+      <ul class="api-list" v-else>
         <li v-for="a in apis" @click="editApi(a)" :class="{active: api.id === a.id}">
           <span class="method-request method-get">{{a.request_type}}</span> {{a.slug}}
         </li>
@@ -56,7 +59,8 @@
         &nbsp;EXPORT
       </button>
       -->
-      <button class="btn btn-success col-12 api-list-export-button" @click="$router.push({name: 'docs-project-version', params: {'project': project.name, 'version': version.name}})">
+      <button v-if="this.apis.length > 0" class="btn btn-success col-12 api-list-export-button"
+              @click="$router.push({name: 'docs-project-version-id', params: {'project': project.name, 'version': version.name, 'id': apis[0].id}})">
         <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
              x="0px" y="0px"
              viewBox="0 0 368.008 368.008"
@@ -97,29 +101,37 @@
             </svg>
             <span v-if="api.id > 0">edit</span>
             <span v-else>new</span>
+
+            <div class="float-right">
+              <button class="btn btn-danger btn-sm" style="padding: 1px 5px" v-if="api.id > 0"
+                      @click="deleteApi(api.id)">Delete API
+              </button>
+            </div>
           </div>
           <form class="form-inline">
             <div class="col-sm-1 p-0 pr-1">
               <label class="sr-only" for="request_type">Request type</label>
-              <select name="request_type" id="request_type" class="form-control col-12 mb-2 mr-sm-2" style="width: 100%; padding: 0 10px;"
+              <select name="request_type" id="request_type" class="form-control col-12 mb-2 mr-sm-2"
+                      style="width: 100%; padding: 0 10px;"
                       v-model="api.request_type" @change="updateApiType()">
                 <option value="GET">GET</option>
                 <option value="POST">POST</option>
               </select>
             </div>
-            <div class="col-sm-10 p-0 pr-1">
+            <div class="col-sm-11 p-0">
               <label class="sr-only" for="slug">Username</label>
               <div class="input-group mb-2">
                 <div class="input-group-prepend">
                   <div class="input-group-text">/{{project.name}}/{{version.name}}/</div>
                 </div>
-                <input type="text" class="form-control" id="slug" placeholder="user/$user_id/edit" v-model="api.slug">
+                <input type="text" class="form-control" id="slug" placeholder="user/$user_id/edit" v-model="api.slug" @keyup="parseSlug">
               </div>
             </div>
+            <!--
             <div class="col-sm-1 p-0">
-              <button type="button" class="btn btn-success mb-2 col-12" @click="save()" style="margin-top: -1px">Save
-              </button>
+              <button type="button" class="btn btn-success mb-2 col-12" @click="save()" style="margin-top: -1px">Save</button>
             </div>
+            -->
             <textarea class="form-control col-12" placeholder="Detail description of this API"
                       v-model="api.description">{{api.description}}</textarea>
           </form>
@@ -130,11 +142,18 @@
             <ul class="api-tabs">
               <li @click="()=>{tab = 'params'}" :class="{active: tab === 'params'}">Params</li>
               <li @click="()=>{tab = 'headers'}" :class="{active: tab === 'headers'}">Headers</li>
-              <li @click="()=>{tab = 'response'}" :class="{active: tab === 'response'}">Response</li>
+              <li @click="()=>{tab = 'response'}" :class="{active: tab === 'response'}">Response success</li>
+              <li @click="()=>{tab = 'response_error'}" :class="{active: tab === 'response_error'}">Response error</li>
             </ul>
           </div>
           <div class="" v-if="tab === 'response'">
-            <textarea rows="12" class="form-control" placeholder="Response content" v-model="api.response"></textarea>
+            <textarea rows="12" class="form-control mb-3" placeholder="Example: {'success': true, data[]}"
+                      v-model="api.response"></textarea>
+          </div>
+          <div class="" v-if="tab === 'response_error'">
+            <textarea rows="12" class="form-control mb-3"
+                      placeholder="Example: {'success': false, 'message': 'User not found'}"
+                      v-model="api.response_error"></textarea>
           </div>
           <div class="" v-if="tab === 'params' || tab === 'headers'">
             <table class="table table-bordered">
@@ -152,15 +171,18 @@
               <tr v-for="(param, index) in params"
                   v-if="(param.request_type !== 'HEADER' && tab !== 'headers') || (param.request_type === 'HEADER' && tab === 'headers')">
                 <td>
-                  <select class="form-control" v-model="param.request_type" v-if="tab !== 'headers'">
-                    <option value="GET">GET</option>
-                    <option value="POST" v-if="api.request_type === 'POST'">POST</option>
-                    <option value="URL">URL</option>
-                  </select>
+                  <template v-if="tab !== 'headers'">
+                    <div v-if="param.request_type === 'URL'" class="disabled" style="padding: 8px 0 0 8px">URL</div>
+                    <select class="form-control" v-model="param.request_type" v-else>
+                      <option value="GET">GET</option>
+                      <option value="POST" v-if="api.request_type === 'POST'">POST</option>
+                    </select>
+                  </template>
                   <div v-else class="disabled" style="padding: 8px 0 0 8px">HEADER</div>
                 </td>
                 <td>
-                  <input class="form-control" placeholder="Parameter name a-zA-Z0-9_-" v-model="param.name"/>
+                  <input disabled v-if="param.request_type === 'URL'" class="form-control" :value="param.name" />
+                  <input v-else class="form-control" placeholder="Parameter name a-zA-Z0-9_-" v-model="param.name" @blur="() => {param.name = stringToUrl(param.name)}" />
                 </td>
                 <td>
                   <input class="form-control" value="" placeholder="Description for this field"
@@ -168,25 +190,29 @@
                 </td>
                 <td>
                   <CustomVueMultiselect
-                                        v-model="param.validator"
-                                        :options="validators"
-                                        track-by="id"
-                                        label="name"
-                                        selectedLabel="Selected"
-                                        selectLabel="Select"
-                                        deselectLabel="Remove"
-                                        placeholder="Data type validator"
-                                        :internal-search="false"
-                                        @input="updateValidator(param)"
+                    v-model="param.validator"
+                    :options="validators"
+                    track-by="id"
+                    label="name"
+                    selectedLabel="Selected"
+                    selectLabel="Select"
+                    deselectLabel="Remove"
+                    placeholder="Data type validator"
+                    :internal-search="false"
+                    @input="updateValidator(param)"
                   />
                 </td>
-                <td class="text-center" style="vertical-align: middle; cursor: pointer" @click="() => {param.required = !param.required}">
-                    <div class="my-form-check-input">
-                      <template v-if="param.required">✓</template>
-                    </div>
+                <td v-if="param.request_type !== 'URL'" class="text-center" style="vertical-align: middle; cursor: pointer"
+                    @click="() => {param.required = !param.required}">
+                  <div class="my-form-check-input" v-if="param.request_type !== 'URL'">
+                    <template v-if="param.required">✓</template>
+                  </div>
+                </td>
+                <td v-else class="text-center" style="vertical-align: middle;">
+                  ✓
                 </td>
                 <td class="text-center" style="vertical-align: middle">
-                  <span class="api-delete-button" @click="()=>{params.splice(index, 1)}">
+                  <span class="api-delete-button" v-if="param.removable && param.request_type !== 'URL'" @click="()=>{params.splice(index, 1)}">
                       <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash-fill"
                            fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                               <path fill-rule="evenodd"
@@ -206,12 +232,17 @@
                       <path fill-rule="evenodd"
                             d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4a.5.5 0 0 0-1 0v3.5H4a.5.5 0 0 0 0 1h3.5V12a.5.5 0 0 0 1 0V8.5H12a.5.5 0 0 0 0-1H8.5V4z"/>
                     </svg>
-                    ADD NEW
+                    <template v-if="tab === 'params'">Add param</template>
+                    <template v-if="tab === 'headers'">Add header</template>
                   </button>
                 </td>
               </tr>
               </tbody>
             </table>
+          </div>
+          <div class="text-center mt-2 pt-2">
+            <button type="button" class="btn btn-outline-secondary mb-2 ml-1 col-2" @click="reset()" style="margin-top: -1px">Reset</button>
+            <button type="button" class="btn btn-success mb-2 ml-1 col-2" @click="save()" style="margin-top: -1px">Save</button>
           </div>
         </div>
       </div>
@@ -246,17 +277,19 @@
       this.version_id = 0
       this.request_type = "GET"
       this.response = ""
+      this.response_error = ""
     }
   }
 
   class Param {
     constructor() {
+      this.id = 0
       this.name = ""
       this.description = ""
       this.request_type = "GET"
       this.removable = true
       this.api_id = 0
-      this.required = true
+      this.required = false
       this.validator = {}
     }
   }
@@ -267,22 +300,23 @@
     components: {CustomVueMultiselect},
     data() {
       return {
-        projects: [],
+        projects: [new Project()],
         project: new Project(),
-        versions: [],
+        versions: [new Version()],
         version: new Version(),
         apis: [],
         api: new Api(),
-        params: [new Param(), new Param(), new Param()],
+        params: [new Param()],
         validators: [],
-
+        select_project: {},
+        select_version: {},
         tab: "params",
         notice: {'status': 'error', 'message': ''}
       }
     },
     mounted() {
-      this.$axios.get('/projects').then(response => {
-        this.projects = response.data.data
+      this.$axios.get('/projects?per_page=500').then(response => {
+        this.projects = response.data.data.data.filter(pr => pr.versions.length > 0)
         if (this.projects.length === 0) {
           this.$router.push('/projects')
         }
@@ -299,36 +333,137 @@
           this.$router.push('/404')
         } else {
           this.project = project
+          this.versions = project.versions
           this.version = version
+          this.select_project = project
+          this.select_version = version
           this.api.version_id = version.id
-        }
-      }).catch(error => {
-        alert("Cannot load project list. Press F5 to try again: " + error)
-      })
-    },
-    watch: {
-      project: function (newVal, oldVal) {
-        if (newVal.id > 0) {
+
+          //Load validators
           this.$axios.get('/project_validators/' + this.project.id).then(response => {
             this.validators = response.data.data
           }).catch(error => {
-            alert("Cannot load validators list. Press F5 to try again: " + error)
+            this.$notify({
+              group: 'notification',
+              title: 'Error',
+              type: 'error',
+              duration: 5000,
+              position: 'top right',
+              text: "Cannot load validators list. Press F5 to try again: " + error
+            });
           })
         }
+      }).catch(error => {
+        this.$notify({
+          group: 'notification',
+          title: 'Error',
+          type: 'error',
+          duration: 5000,
+          position: 'top right',
+          text: "Cannot load project list. Press F5 to try again: " + error
+        });
+      })
+
+      let url = '/list_api/' + this.$route.params.project + '/' + this.$route.params.version
+      this.$axios.get(url).then(response => {
+        if (response.data.status == 'success') {
+          this.apis = response.data.data.apis
+          if (this.apis.length > 0) {
+            this.editApi(this.apis[0])
+          }
+        }
+      }).catch(error => {
+        this.$notify({
+          group: 'notification',
+          title: 'Error',
+          type: 'error',
+          duration: 5000,
+          position: 'top right',
+          text: "Cannot load api list. Press F5 to try again: " + error
+        });
+      })
+    },
+    watch: {
+      select_project: function (newVal, oldVal) {
+        if (newVal.id > 0) {
+          if (newVal.versions.length > 0) {
+            this.versions = newVal.versions
+            let version = this.versions.find(element => element.name === this.$route.params.version)
+            if (version) {
+              this.select_version = version
+            } else {
+              this.select_version = newVal.versions[0]
+            }
+          }
+        }
       },
-      version: function (newVal, oldVal) {
-        this.$axios.get('/version_apis/' + newVal.id).then(response => {
-          this.apis = response.data.data
-        }).catch(error => {
-          alert("Cannot load api list. Press F5 to try again: " + error)
-        })
+      select_version: function (newVal, oldVal) {
+        if(newVal && typeof newVal.name !== 'undefined') {
+          this.$router.push({name: 'api-project-version', params: {project: this.select_project.name, version: newVal.name}})
+        }
       }
     },
     methods: {
+      parseSlug() {
+        this.api.slug = this.api.slug.replace(' ', '');
+        let slugParts = this.api.slug.split('/')
+        let urlParams = []
+        for(let i = 0; i < slugParts.length; i++) {
+          if(slugParts[i].startsWith('$')) {
+            let paramName = slugParts[i].replace('$', '')
+            urlParams.push(paramName)
+            let existingParam = this.params.find(p => (p.request_type === 'URL' && p.name == paramName))
+            if(!existingParam) {
+              let newParam = new Param()
+              newParam.api_id = this.api.id
+              newParam.request_type = 'URL'
+              newParam.description = 'Variable on URL'
+              newParam.required = true
+              newParam.removable = false
+              newParam.name = paramName
+              this.params.unshift(newParam)
+            }
+          }
+        }
+
+        this.params = this.params.filter(p => (p.request_type !== 'URL' || (p.request_type === 'URL' && urlParams.includes(p.name))))
+      },
+      stringToUrl(str) {
+        str = str.replace(/^\s+|\s+$/g, ''); // trim
+        str = str.toLowerCase();
+
+        // remove accents, swap ñ for n, etc
+        let from = "àáảãạăäâấầẩẫậắằẳẵặẻẽẹềếểễệèéëêỉĩịìíïîỏõọồốổỗộơờớởỡợòóöôủũụùúüûñç·/,:;";
+        let to   = "aaaaaaaaaaaaaaaaaaeeeeeeeeeeeeiiiiiiiooooooooooooooooooouuuuuuunc-----";
+        for (let i = 0, l = from.length; i < l; i++) {
+          str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
+        }
+        str = str.replace(/[^a-z0-9 -._]/g, '') // remove invalid chars
+          .replace(/\s+/g, '-') // collapse whitespace and replace by -
+          .replace(/-+/g, '-'); // collapse dashes
+
+        return str
+      },
+      reset() {
+        this.params = this.params.filter(p => p.request_type === 'URL')
+      },
+      goToVersion() {
+        this.$router.push({
+          name: 'api-project-version',
+          params: {'project': this.select_project.name, version: this.select_version.name}
+        })
+      },
+      setNotice: function (notice) {
+        this.notice = notice
+        let that = this
+        setTimeout(function () {
+          that.notice = {'status': 'error', 'message': ''}
+        }, 3000);
+      },
       updateApiType() {
-        if(this.api.request_type === 'GET') {
-          for(let i = 0; i < this.params.length; i++) {
-            if(this.params[i].request_type === 'POST') {
+        if (this.api.request_type === 'GET') {
+          for (let i = 0; i < this.params.length; i++) {
+            if (this.params[i].request_type === 'POST') {
               this.params[i].request_type = 'GET'
             }
           }
@@ -374,27 +509,114 @@
             // Update state
             this.params = params
           } else {
-            this.notice = response.data;
+            this.setNotice(response.data);
           }
         }).catch(error => {
-          alert("Lỗi lấy API: " + error)
+          this.$notify({
+            group: 'notification',
+            title: 'Error',
+            type: 'error',
+            duration: 5000,
+            position: 'top right',
+            text: "Cannot load api. Press F5 to try again: " + error
+          });
         })
+      },
+      deleteApi(api_id) {
+        if (confirm("Do you really want to delete?")) {
+          this.$axios.get('/api/delete/' + api_id).then(response => {
+            if(response.data.status == 'success') {
+              this.apis = this.apis.filter(obj => obj.id !== api_id);
+              let newApi = new Api()
+              newApi.version_id = this.api.version_id
+              this.api = newApi
+              this.params = [new Param()]
+              this.$notify({
+                group: 'notification',
+                title: 'Done',
+                type: 'success',
+                duration: 5000,
+                position: 'top right',
+                text: "API deleted"
+              });
+            } else {
+              this.$notify({
+                group: 'notification',
+                title: 'Error',
+                type: 'error',
+                duration: 5000,
+                position: 'top right',
+                text: response.data.message
+              });
+            }
+          }).catch(error => {
+            this.$notify({
+              group: 'notification',
+              title: 'Error',
+              type: 'error',
+              duration: 5000,
+              position: 'top right',
+              text: "Cannot delete. Error: " + error
+            });
+          })
+        }
       },
       save() {
         let sendData = {"api": this.api, "params": this.params}
+        if (sendData.api.description === '') {
+          this.setNotice({'status': 'error', 'message': 'API description is required'})
+          return
+        }
+        for (let i = 0; i < sendData.params.length; i++) {
+          if (sendData.params[i].name === '' || sendData.params[i].name === '') {
+            this.setNotice({'status': 'error', 'message': 'Name and description of all params, headers are required'})
+            return
+          }
+        }
+
         this.$axios.post('api/save', sendData).then(response => {
           if (response.data.status === "success") {
-            window.location.reload();
+            // Reset form
+            let newApi = new Api();
+            newApi.version_id = this.version.id
+            this.api = newApi
+            this.params = [new Param()]
 
-            // TODO: Thêm thông tin API vừa lưu vào danh sách API ở sidebar
-            //this.api = new Api();
-            //this.apis.shift(response.data.data);
-            this.notice = {'status': 'success', 'message': ''};
+            // Add API to API lists on sidebar
+            let appendApiToList = new Api()
+            let responseApi = response.data.data.api;
+            for (let x = 0; x < Object.keys(appendApiToList).length; x++) {
+              if (typeof responseApi[Object.keys(appendApiToList)[x]] !== 'undefined') {
+                appendApiToList[Object.keys(appendApiToList)[x]] = responseApi[Object.keys(appendApiToList)[x]]
+              }
+            }
+
+            if(sendData.api.id > 0) {
+              this.apis = this.apis.filter(a => a.id !== sendData.api.id)
+            }
+            this.apis.unshift(appendApiToList)
+
+            this.$notify({
+              group: 'notification',
+              title: 'Done',
+              type: 'success',
+              duration: 5000,
+              position: 'top right',
+              text: 'API saved successfully'
+            });
+            this.editApi(appendApiToList)
           } else {
-            this.notice = response.data;
+            this.setNotice(response.data);
           }
         }).catch(error => {
-          alert("Lỗi lưu API: " + error)
+          this.$notify({
+            group: 'notification',
+            title: 'Error',
+            type: 'error',
+            duration: 5000,
+            position: 'top right',
+            text: "Error while save API: " + error
+          });
         })
       }
     }
@@ -402,9 +624,9 @@
 </script>
 <style scoped>
   .btn-add-new-param {
-    /*border-color: #dee2e6 !important;*/
-    border-color: #f3f3f3 !important;
+    border: none
   }
+
   .btn-add-new-param:hover, .btn-add-new-param:focus, .btn-add-new-param:active {
     border-color: #f3f3f3 !important;
     background: #FFF !important;
@@ -545,6 +767,7 @@
   .api-delete-button {
     cursor: pointer;
     color: #929292;
+    margin-top: -3px;
   }
 
   .api-delete-button:hover {
