@@ -93,10 +93,10 @@ a:hover {
 }
 
 .my-pagination li a {
-  color: #EEE;
+  color: #FFF;
   padding: 3px 10px;
   border: 1px solid #FFF;
-  background: #414845;
+  background: #069255;
 }
 
 .my-pagination li a:focus {
@@ -105,7 +105,7 @@ a:hover {
 }
 
 .my-pagination .active a {
-  background: #069255;
+  background: #000;
 }
 
 .my-pagination .disabled a {

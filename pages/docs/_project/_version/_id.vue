@@ -11,7 +11,7 @@
       </ul>
       <a class="btn btn-success col-12 api-list-export-button" :href="export_url+'?token='+token"
          target="_blank">
-        <img src="~assets/images/postman.svg" style="height: 30px;">
+        <img src="~assets/images/postman.svg" style="height: 25px;">
       </a>
     </div>
     <div class="container pt-3">

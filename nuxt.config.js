@@ -73,8 +73,8 @@ export default {
     '@nuxtjs/auth-next'
   ],
   axios: {
-    proxyHeaders: true,
-    proxy: true,
+    //proxyHeaders: true,
+    //proxy: true,
     baseURL: 'http://thgiangapi.com/api',
   },
   auth: {

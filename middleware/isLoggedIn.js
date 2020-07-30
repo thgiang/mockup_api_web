@@ -1,5 +1,5 @@
 export default function (context) {
   if(context.$auth.loggedIn) {
-    return context.redirect('/project/1')
+    return context.redirect('/projects/1')
   }
 }

@@ -3,18 +3,21 @@
     <div class="row">
       <div class="col-12">
         <h1 class="float-left">Your projects</h1>
-        <nuxt-link :to="{name: 'project-new'}">
+        <nuxt-link :to="{name: 'projects-new'}">
           <button class="btn btn-success float-right mt-2">Add new</button>
         </nuxt-link>
       </div>
     </div>
 
     <div class="row">
-      <div class="col-12">
-        <p v-if="projects.length === 0">
-          No project belongs to you. You can try to  <nuxt-link :to="{name: 'project-new'}">create a new one</nuxt-link>
+      <div class="col-12" v-if="projects.length === 0">
+        <p>
+          No project belongs to you. You can try to
+          <nuxt-link :to="{name: 'projects-new'}">create a new one</nuxt-link>
         </p>
-        <table class="table table-bordered mt-2" v-else>
+      </div>
+      <div class="col-12" v-else>
+        <table class="table table-bordered mt-2">
           <thead>
           <tr>
             <th style="width: 25%">Name</th>
@@ -44,10 +47,10 @@
               </template>
               <div class="ml-1 project-visibility d-inline-block">
                 <template v-if="project.visibility === 0">
-                  <font-awesome-icon icon="lock" class="d-inline-block" />
+                  <font-awesome-icon icon="lock" class="d-inline-block"/>
                 </template>
                 <template v-else-if="project.visibility === 10">
-                  <font-awesome-icon icon="user-shield" class="d-inline-block" />
+                  <font-awesome-icon icon="user-shield" class="d-inline-block"/>
                 </template>
               </div>
               <div class="ml-1 project-role d-inline-block">{{project.role}}</div>
@@ -55,12 +58,14 @@
             <td>
               <div style="float: left; width: calc(100% - 18px)">
                 <span v-for="(version, version_index) in project.versions" :key="version_index">
-                  <div class="version_group" v-if="project.role === 'DEVELOPER' || project.role === 'LEADER' || project.role === 'OWNER' ||  project.role === 'SUPER'">
+                  <div class="version_group"
+                       v-if="project.role === 'DEVELOPER' || project.role === 'LEADER' || project.role === 'OWNER' ||  project.role === 'SUPER'">
                     <nuxt-link
                       :to="{name: 'api-project-version', params: {'project': project.name, 'version': version.name}}">
                       {{version.name}}
                     </nuxt-link>
-                    <button @click="deleteVersion(project, version_index, version.id)"  v-if="project.role !== 'DEVELOPER'"
+                    <button @click="deleteVersion(project, version_index, version.id)"
+                            v-if="project.role !== 'DEVELOPER'"
                             class="btn-add-version delete-version-btn">-</button>
                   </div>
                   <template v-else>
@@ -95,7 +100,9 @@
                     </div>
                     <div class="col-sm-5 mb-1">
                       <input type="text" class="form-control form-control-sm" placeholder="New version name"
-                             v-model="new_version_name" @keyup="() => {new_version_name = stringToUrl(new_version_name)}" v-on:keyup.enter="saveVersion(project)">
+                             v-model="new_version_name"
+                             @keyup="() => {new_version_name = stringToUrl(new_version_name)}"
+                             v-on:keyup.enter="saveVersion(project)">
                     </div>
                     <div class="col-sm-2 mb-1">
                       <button type="button" class="btn btn-success btn-sm col-12" @click="saveVersion(project)">
@@ -110,35 +117,26 @@
             <td>{{project.description}}</td>
             <td class="text-center" style="vertical-align: middle">
               <template v-if="project.role === 'LEADER' || project.role === 'OWNER' ||  project.role === 'SUPER'">
-                <nuxt-link :to="{'name': 'project-edit-id', params: {'id': project.id}}" class="api-delete-button">
-                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"
-                       x="0px"
-                       y="0px" width="15px" height="15px" viewBox="0 0 1000 1000" enable-background="new 0 0 1000 1000"
-                       xml:space="preserve">
-                  <path
-                    d="M968.161,31.839c36.456,36.456,36.396,95.547,0,132.003l-43.991,43.991L792.138,75.83l43.991-43.991  C872.583-4.586,931.704-4.617,968.161,31.839z M308.238,559.79l-43.96,175.963l175.963-43.991l439.938-439.938L748.147,119.821  L308.238,559.79z M746.627,473.387v402.175H124.438V253.373h402.204l124.407-124.438H0V1000h871.064V348.918L746.627,473.387z"/>
-                </svg>
+                <nuxt-link :to="{'name': 'projects-edit-id', params: {'id': project.id}}" class="api-delete-button">
+                  <font-awesome-icon icon="edit" class="d-inline-block"/>
                 </nuxt-link>
-                <span class="d-none d-sm-inline-block">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
-                <span class="api-delete-button" @click="deleteProject(project_index, project.id)">
-                  <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-trash-fill"
-                       fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                          <path fill-rule="evenodd"
-                                d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5a.5.5 0 0 0-1 0v7a.5.5 0 0 0 1 0v-7z"/>
-                  </svg>
-                </span>
+                <span class="d-none d-sm-inline-block">&nbsp;|&nbsp;</span>
+                <a href="#" class="api-delete-button" @click="deleteProject(project_index, project.id)">
+                  <font-awesome-icon icon="trash" class="d-inline-block"/>
+                </a>
               </template>
             </td>
           </tr>
           </tbody>
         </table>
       </div>
-      <div class="col-md-12 text-center">
+
+      <div class="col-12 text-center">
         <paginate
           v-model="current_page"
           :page-count="last_page"
           :click-handler="goToPage"
-          :prev-text="'Previos'"
+          :prev-text="'Previous'"
           :next-text="'Next'"
           :container-class="'my-pagination'">
         </paginate>
@@ -148,8 +146,10 @@
 </template>
 
 <script>
+  import Paginate from "vuejs-paginate";
 
   export default {
+    components: {Paginate},
     data() {
       return {
         projects: [],
@@ -162,7 +162,24 @@
       }
     },
     mounted() {
-      this.loadProjects()
+      this.$axios.get('/projects?page='+this.$route.params.page).then(response => {
+        if (response.data.status === 'success') {
+          this.projects = response.data.data.data
+          this.current_page = response.data.data.current_page
+          this.last_page = response.data.data.last_page
+        } else {
+          this.$notify({
+            group: 'notification',
+            title: 'Error',
+            type: 'error',
+            duration: 5000,
+            position: 'top right',
+            text: response.data.message
+          });
+        }
+      }).catch(error => {
+        alert("Cannot load project list. Press F5 to try again: " + error)
+      })
     },
     methods: {
       goToPage(page) {
@@ -174,7 +191,7 @@
 
         // remove accents, swap ñ for n, etc
         let from = "àáảãạăäâấầẩẫậắằẳẵặẻẽẹềếểễệèéëêỉĩịìíïîỏõọồốổỗộơờớởỡợòóöôủũụùúüûñç·/,:;";
-        let to   = "aaaaaaaaaaaaaaaaaaeeeeeeeeeeeeiiiiiiiooooooooooooooooooouuuuuuunc-----";
+        let to = "aaaaaaaaaaaaaaaaaaeeeeeeeeeeeeiiiiiiiooooooooooooooooooouuuuuuunc-----";
         for (let i = 0, l = from.length; i < l; i++) {
           str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
         }
@@ -234,26 +251,6 @@
           this.new_version_error = "Error when save new version :("
         })
       },
-      loadProjects() {
-        this.$axios.get('/projects').then(response => {
-          if(response.data.status === 'success') {
-            this.last_page = response.data.data.last_page
-            this.current_page = response.data.data.current_page
-            this.projects = response.data.data.data
-          } else {
-            this.$notify({
-              group: 'notification',
-              title: 'Error',
-              type: 'error',
-              duration: 5000,
-              position: 'top right',
-              text: response.data.message
-            });
-          }
-        }).catch(error => {
-          alert("Cannot load project list. Press F5 to try again: " + error)
-        })
-      },
       newVersion(project_id) {
         this.new_version_error = ''
         this.new_version_name = ''
@@ -281,12 +278,14 @@
     color: #707070;
     font-size: 13px;
   }
+
   .project-role {
     border: 1px solid #dfdfdf;
     border-radius: 3px;
     padding: 1px 5px;
     font-size: 13px;
   }
+
   .btn-add-version:focus {
     outline: none;
   }

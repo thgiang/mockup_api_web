@@ -11,9 +11,9 @@
             </nuxt-link>
           </div>
           <ul class="header-menu" v-if="this.$auth.user">
-            <li><nuxt-link :to="{name: 'project-page', params: {page: '1'}}">Projects</nuxt-link></li>
+            <li><nuxt-link :to="{name: 'projects-page', params: {page: '1'}}">Projects</nuxt-link></li>
             <template v-if="this.$auth.user.is_super_admin">
-              <li><nuxt-link to="/users">Users</nuxt-link></li>
+              <li><nuxt-link :to="{name: 'users-page', params: {page: '1'}}">Users</nuxt-link></li>
             </template>
           </ul>
 
